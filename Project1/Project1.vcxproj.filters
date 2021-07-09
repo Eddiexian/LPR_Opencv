@@ -18,9 +18,6 @@
     <ClCompile Include="Source.cpp">
       <Filter>來源檔案</Filter>
     </ClCompile>
-    <ClCompile Include="image_preprocess.cpp">
-      <Filter>來源檔案</Filter>
-    </ClCompile>
     <ClCompile Include="detection.cpp">
       <Filter>來源檔案</Filter>
     </ClCompile>

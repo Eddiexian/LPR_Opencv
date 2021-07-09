@@ -126,7 +126,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="detection.cpp" />
-    <ClCompile Include="image_preprocess.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
