@@ -1,6 +1,8 @@
 #include <iostream>
 #include <io.h>
 #include <opencv2/opencv.hpp>
+#include "detection.h"
+
 using namespace cv;
 using namespace std;
 using namespace cv::ml;
@@ -53,7 +55,7 @@ vector<Mat> verticalProject(Mat srcimg)
 	{
 		line(draw_img, Point(i, height_src), Point(i, height_src - vector_num[i]), Scalar(255), 1, 8);
 	}
-	imshow("Draw_img", draw_img);
+	imshow("Draw_imgV", draw_img);
 
 	bool alreadystart = false;
 	int start_index = 0;
@@ -67,12 +69,17 @@ vector<Mat> verticalProject(Mat srcimg)
 			alreadystart = true;
 			start_index = i;
 		}
-		else if (alreadystart && vector_num[i] <= 4) //fuzzy range
+		else if (alreadystart && vector_num[i] <= 3) //fuzzy range
 		{
 			alreadystart = false;
 			end_index = i;
-			Mat roi = srcimg(Range(0, height_src), Range(start_index-3, end_index+3)); //segimg
-			if (roi.cols >= 20)
+			if (start_index > 3 && end_index < width_src - 4)
+			{
+				start_index -= 3;
+				end_index += 3;
+			}
+			Mat roi = srcimg(Range(0, height_src), Range(start_index, end_index)); //segimg
+			if (roi.cols >= 10)
 			{
 				roi_img.push_back(roi);
 			}
@@ -111,7 +118,7 @@ vector<Mat> horizontalProject(Mat srcimg)
 	{
 		line(draw_img, Point(width_src, i), Point(width_src - vector_num[i], i), Scalar(255), 1, 8);
 	}
-	imshow("Draw_img", draw_img);
+	imshow("Draw_imgH", draw_img);
 
 	bool alreadystart = false;
 	int start_index = 0;
@@ -125,11 +132,16 @@ vector<Mat> horizontalProject(Mat srcimg)
 			alreadystart = true;
 			start_index = i;
 		}
-		else if (alreadystart && vector_num[i] <= 4) //fuzzy range
+		else if (alreadystart && vector_num[i] <= 20) //fuzzy range
 		{
 			alreadystart = false;
 			end_index = i;
-			Mat roi = srcimg(Range(start_index-3, end_index+3), Range(0, width_src)); //segimg
+			if (start_index > 3 && end_index < height_src - 4)
+			{
+				start_index -= 3;
+				end_index += 3;
+			}
+			Mat roi = srcimg(Range(start_index, end_index), Range(0, width_src)); //segimg
 			if (roi.rows >= 20)
 			{
 				roi_img.push_back(roi);
@@ -379,63 +391,73 @@ int SVM_predict(Mat src, Ptr<SVM> svm)
 	return  ans;
 }
 
-//
-//int main(int argc, char** argv)
-//{
-//
-//	/* SVM Model Loading
-//	
-//	Ptr<SVM> svm = cv::ml::SVM::load("SVM_HOG.xml ");
-//	if (svm->empty())
-//	{
-//		std::cout << "load svm detector failed!!!" << std::endl;
-//		return 0;
-//	}
-//
-//	*/
-//	
-//	//KNN_train();
-//	//SVM_train();
-//	
-//
-//	cout << "Loading KNN model..." << endl;
-//	Ptr<KNearest> model = StatModel::load<KNearest>("KNN_model.xml");
-//	cout << "Success loading." << endl;
-//
-//	Mat src = imread("D://2.jpg");
-//	
-//	if (src.empty())
-//	{
-//		cout << "Can not find the image..." << endl;
-//		system("pause");
-//	}
-//	imshow("Input image", src);
-//	
-//	Mat gray_img, bin_img;
-//	cvtColor(src, gray_img, COLOR_BGR2GRAY);
-//	threshold(gray_img, bin_img, 0, 255, THRESH_BINARY_INV | THRESH_OTSU);
-//
-//	imshow("Bin img", bin_img);
-//
-//	//先進行水平投影
-//	vector<Mat> roi_first = horizontalProject(bin_img);
-//
-//	for (int i = 0; i < roi_first.size(); i++)
-//	{
-//		vector<Mat> roi_Final = verticalProject(roi_first[i]); //垂直投影
-//		for (int j = 0; j < roi_Final.size(); j++)
-//		{
-//			string k = to_string(j);
-//			imshow(k, roi_Final[j]);
-//			int ans = KNN_predict(roi_Final[j],model); //KNN分類
-//			//int ans =  SVM_predict(roi_Final[j],svm);
-//			cout << "分類: " << a[ans] << endl;
-//		}
-//	}
-//	
-//
-//	waitKey(0);
-//	
-//	
-//	return 0;
-//}
+
+int main(int argc, char** argv)
+{
+
+	/* SVM Model Loading
+	
+	Ptr<SVM> svm = cv::ml::SVM::load("SVM_HOG.xml ");
+	if (svm->empty())
+	{
+		std::cout << "load svm detector failed!!!" << std::endl;
+		return 0;
+	}
+
+	*/
+	
+	//KNN_train();
+	//SVM_train();
+	
+
+	cout << "Loading KNN model..." << endl;
+	Ptr<KNearest> model = StatModel::load<KNearest>("KNN_model.xml");
+	cout << "Success loading." << endl;
+
+
+	
+	Mat src = imread("D://ALJ_0000.jpg");
+	
+	if (src.empty())
+	{
+		cout << "Can not find the image..." << endl;
+		system("pause");
+	}
+	imshow("Input image", src);
+
+
+	Mat pic = preprocess_all(src);
+
+	//imshow("processed", pic);
+	Rect roi;
+	roi = selectROI(pic);
+	pic = pic(roi);
+	imshow("ROI", pic);
+	Mat gray_img, bin_img;
+	cvtColor(pic, gray_img, COLOR_BGR2GRAY);
+	threshold(gray_img, bin_img, 0, 255, THRESH_BINARY_INV | THRESH_OTSU);
+
+	imshow("Bin img", bin_img);
+
+	//先進行水平投影
+	vector<Mat> roi_first = horizontalProject(bin_img);
+
+	for (int i = 0; i < roi_first.size(); i++)
+	{
+		vector<Mat> roi_Final = verticalProject(roi_first[i]); //垂直投影
+		for (int j = 0; j < roi_Final.size(); j++)
+		{
+			string k = to_string(j);
+			imshow(k, roi_Final[j]);
+			int ans = KNN_predict(roi_Final[j],model); //KNN分類
+			//int ans =  SVM_predict(roi_Final[j],svm);
+			cout << "分類: " << a[ans] << endl;
+		}
+	}
+	
+
+	waitKey(0);
+	
+	
+	return 0;
+}

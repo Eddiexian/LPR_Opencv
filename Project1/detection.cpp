@@ -23,8 +23,6 @@ void drawLines(Mat& input, const std::vector<Vec2f>& lines) {
 	}
 }
 
-
-
 vector<Point> findLinePoint(Vec2f& line,int rows,int cols)
 {
 	float r = line[0];
@@ -47,7 +45,6 @@ vector<Point> findLinePoint(Vec2f& line,int rows,int cols)
 
 	return linepoint;
 }
-
 
 double getDistance(Point a, Point b)
 {
@@ -109,7 +106,7 @@ Mat preprocess_perceptive(Mat src,Mat edge)
 
 		drawContours(drawing, hull, (int)i, Scalar(255, 255, 255));
 	}
-	//imshow("Hull demo", drawing);
+	imshow("Hull demo", drawing);
 
 	//cout << "ConvexHull: " << hull[0] << endl;
 
@@ -118,14 +115,14 @@ Mat preprocess_perceptive(Mat src,Mat edge)
 
 	vector< Vec2f > lines;
 
-	HoughLines(drawing, lines, 1, CV_PI / 50, 50);
+	HoughLines(drawing, lines, 1, CV_PI / 50, 35);
 	//cout << "픎ㅢ㏛퐑" << endl;
 
 	Mat line_test = Mat::zeros(src.rows, src.cols, CV_8UC3);
 
 	drawLines(drawing, lines);
 
-	//imshow("㏛퐑", drawing);
+	imshow("㏛퐑", drawing);
 
 
 	int rowsForline = src.rows;
@@ -300,17 +297,8 @@ Mat AffineTransform(Mat src,Mat edge)
 	return warp_dst;
 }
 
-int main()
+Mat preprocess_all(Mat src)
 {
-	Mat src = imread("D://ALJ_0000.jpg");
-
-	if (src.empty())
-	{
-		cout << "Can not find the image..." << endl;
-		system("pause");
-	}
-	//imshow("Input image", src);
-
 	Mat gray_img, bin_img;
 	cvtColor(src, gray_img, COLOR_BGR2GRAY);
 	threshold(gray_img, bin_img, 0, 255, THRESH_BINARY_INV | THRESH_OTSU);
@@ -323,26 +311,17 @@ int main()
 
 	Mat processed = preprocess_perceptive(src, edge);
 
-	imshow("test", processed);
-	
+	//imshow("test", processed);
+
 	Mat gray_img_processed, bin_img_processed;
 	cvtColor(processed, gray_img_processed, COLOR_BGR2GRAY);
 	threshold(gray_img_processed, bin_img_processed, 0, 255, THRESH_BINARY_INV | THRESH_OTSU);
 
-	imshow("Bin img", bin_img_processed);
+	//imshow("Bin img", bin_img_processed);
 	Mat edge_processed;
 	Canny(bin_img, edge_processed, 200, 100);
 
 	Mat last = AffineTransform(processed, edge_processed);
 
-	imshow("after transform", last);
-
-
-
-	waitKey(0);
-
-	return 0;
-
-
-
+	return last;
 }
