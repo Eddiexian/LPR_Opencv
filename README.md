@@ -35,4 +35,37 @@
     
     
 
+---
+
+* 輸入影像
+![](https://i.imgur.com/2dAkazf.png)
+
+* 二值化
+![](https://i.imgur.com/S9yE6yk.png)
+
+* Canny檢測邊緣
+![](https://i.imgur.com/1WGmUyg.png)
+
+* 尋找輪廓包覆最大區域 & ConvexHull
+![](https://i.imgur.com/c7maJPC.png)
+
+* 霍夫找線
+![](https://i.imgur.com/8gGyFid.png)
+
+* 尋找線之交點並進行透視轉換
+![](https://i.imgur.com/zqeO3M4.png)
+
+* 仿射轉換調整角度
+![](https://i.imgur.com/Oc6XVIP.png)
+
+* 抓取車牌區域
+![](https://i.imgur.com/bnOU8GB.png)
+
+* 字符分割
+![](https://i.imgur.com/QJSJb0p.png)
+
+* KNN辨識
+![](https://i.imgur.com/ahgcyf3.png)
+
+
 
